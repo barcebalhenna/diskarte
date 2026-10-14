@@ -43,7 +43,7 @@ js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
 js/gamble.js      M4 — rigged odds model (stub, numbers from SRS App. B)
 js/compulsion.js  M5 — compulsion meter + bands (stub)
-js/events.js      M3 — life-event cards + dark-pattern ads (stub)
+js/events.js      M3 — data-driven life-event cards, 1 per week (done)
 js/debrief.js     M6 — weekly debrief + win/lose checks (stub)
 js/paths.js       M7 — scripted Path A/B beats (stub)
 js/main.js        boot + stage scaling
@@ -81,9 +81,17 @@ it). You should see the Title screen; you can click through all 11 screens.
   `budget.js` and is wired into the S8/S9 placeholders so it's testable now;
   M5/M6 will build those screens out around it. Under-funding drain sizes are a
   tunable prototype choice (SRS gives costs/meters, not magnitudes).
-- **Next: M3** — Life-event card system driven by data; implement the
-  Appendix C events for weeks 1–3 (1–3 choices each, applying cost/consequence).
-  See the Build Plan.
+- **M3 (life events): DONE.** `events.js` is a data-driven registry of all
+  Appendix C week 1–3 life events (org fee, Lola, midterm, loan-shark follow-up,
+  raket), each with 1–3 choices whose `apply()` mutates cash/meters/debt and
+  returns a Taglish result line. The S4 card shows exactly one event per week:
+  W1 org fee, W2 Lola, W3 loan-shark if `debt > 0` else the raket (midterm is
+  defined and ready for M7 scripting). Choices disable when unaffordable.
+  Meter-hit magnitudes are a documented, tunable prototype choice (SRS fixes
+  the peso costs only). Gambling ADS (also in Appendix C) are M4.
+- **Next: M4** — Temptation ad (≥3 dark patterns, Play / Report-Dismiss) and
+  the rigged gambling minigame with the always-on odds tracker (SRS §4.2.5 /
+  Appendix B). See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

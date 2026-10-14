@@ -110,8 +110,9 @@ html, body {
   text-align: center;
   transition: transform .05s ease, filter .1s ease;
 }
-.btn:hover { filter: brightness(1.08); }
-.btn:active { transform: translateY(1px); }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.4; cursor: default; }
 .btn--green { background: var(--green); color: #06231c; }
 .btn--red   { background: var(--red);   color: #fff; }
 .btn--ghost { background: transparent;  color: var(--muted); border-color: var(--muted); }
@@ -351,4 +352,26 @@ html, body {
   color: var(--text);
   min-width: 56px;
   text-align: right;
+}
+
+/* ===================== Life-Event Card (M3) ===================== */
+.ev__card {
+  background: var(--panel);
+  border: 2px solid rgba(241, 250, 238, 0.14);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0 auto;        /* pushes the choice buttons toward the bottom */
+}
+.ev__body {
+  font-size: 19px;
+  line-height: 1.2;
+  color: var(--text);
+}
+.ev__result {
+  font-size: 17px;
+  line-height: 1.2;
+  color: var(--warm);
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(141, 153, 174, 0.4);
 }

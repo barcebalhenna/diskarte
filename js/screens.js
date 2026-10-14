@@ -137,6 +137,54 @@ window.Diskarte = window.Diskarte || {};
     refresh();
   }
 
+  // ----- S4 Life-Event Card screen (M3) -----
+  // Shows the one event picked for this week; each choice applies its effects
+  // immediately, then a result line + Continue advances to the ad (Flow Spec §2).
+  function buildEvent(scr) {
+    var ev = Diskarte.events.pick(Diskarte.state.week, Diskarte.state);
+
+    scr.appendChild(el('div', 'scr__tag', 'S4 · Life Event · M3'));
+    scr.appendChild(el('div', 'scr__title', ev ? ev.title : 'Life Event'));
+
+    var card = el('div', 'ev__card');
+    card.appendChild(el('div', 'ev__body', ev ? ev.body : 'Walang pangyayari ngayong linggo.'));
+    scr.appendChild(card);
+
+    var actions = el('div', 'scr__actions');
+    scr.appendChild(actions);
+
+    function toAd() { Diskarte.screens.show('ad'); }
+
+    if (!ev) {
+      var contOnly = el('button', 'btn', 'Continue');
+      contOnly.addEventListener('click', toAd);
+      actions.appendChild(contOnly);
+      return;
+    }
+
+    function showResult(text) {
+      actions.innerHTML = '';
+      card.appendChild(el('div', 'ev__result', text));
+      var cont = el('button', 'btn btn--green', 'Continue');
+      cont.addEventListener('click', toAd);
+      actions.appendChild(cont);
+    }
+
+    var resolved = false;
+    ev.choices.forEach(function (c) {
+      var disabled = (typeof c.enabled === 'function') && !c.enabled(Diskarte.state);
+      var label = c.label + (disabled && c.note ? ' — ' + c.note : '');
+      var btn = el('button', 'btn', label);
+      if (disabled) btn.disabled = true;
+      btn.addEventListener('click', function () {
+        if (resolved) return;
+        resolved = true;
+        showResult(c.apply());
+      });
+      actions.appendChild(btn);
+    });
+  }
+
   // --- Screen definitions (placeholders). Transitions = Flow Spec §2. ---
   var SCREENS = {
     title: {
@@ -178,9 +226,9 @@ window.Diskarte = window.Diskarte || {};
     },
     event: {
       id: 'event', tag: 'S4 · Life Event · M3',
-      title: 'Life-Event\nCard',
-      desc: 'An unexpected cost or choice (or a positive raket). 1–3 options.',
-      actions: [{ label: 'Resolve choice', to: 'ad' }]
+      title: 'Life-Event Card',
+      // Data-driven card; builds its own choice + Continue buttons.
+      build: function (scr) { buildEvent(scr); }
     },
     ad: {
       id: 'ad', tag: 'S5 · Temptation Ad (phone) · M4', phone: true,
