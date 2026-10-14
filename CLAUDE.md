@@ -42,7 +42,7 @@ js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
 js/gamble.js      M4 — rigged odds model + spin (done, SRS App. B)
-js/compulsion.js  M5 — compulsion meter + bands (stub)
+js/compulsion.js  M5 — compulsion band authority + effects (done)
 js/events.js      M3 — data-driven life-event cards, 1 per week (done)
 js/debrief.js     M6 — weekly debrief + win/lose checks (stub)
 js/paths.js       M7 — scripted Path A/B beats (stub)
@@ -98,9 +98,19 @@ it). You should see the Title screen; you can click through all 11 screens.
   (₱50/100/200, unaffordable disabled) + SPIN; S7 reveals the result (wins
   deliberately flat per NFR-ETH-2). The always-on **odds tracker** shows the
   true next-spin win %, totals, and net (red when negative) on S6 and S7.
-- **Next: M5** — Compulsion bands (urge popups at 40, locked safe options at
-  70, game-over at 100), loan-shark 5-6 borrowing, and a Consequence screen
-  summarizing the week's deltas. See the Build Plan.
+- **M5 (compulsion, debt, consequence): DONE.** `compulsion.js` is the band
+  authority (control/urge/hooked/addiction at 40/70/100); the HUD reuses it.
+  Band effects fire exactly on the thresholds: Urge (≥40) shows "one more spin"
+  nudges on the Hub and Result; Hooked (≥70) locks the Savings row in the
+  Budget; Addiction (100) triggers game-over at S8 → routes to the lose screen
+  with `loseReason`. `Diskarte.borrow()` is the shared 5-6 rule (debt = 1.2×;
+  weekly +20% compounding already in `budget.endWeek`); the Lola event reuses
+  it. The S8 Consequence screen applies the week's meter drains, shows deltas
+  vs the Hub snapshot (color-coded), offers a 5-6 loan, and surfaces the band.
+- **Next: M6** — Weekly debrief (real spend/save/gamble numbers + one
+  reflective line), win/lose evaluation after Week 3 (§4.2.10 / Flow Spec
+  hard-fail + win check), End-Win/Lose screens with the FR-15 support message,
+  and Replay. See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

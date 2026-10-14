@@ -117,4 +117,13 @@ Diskarte.state = Object.assign({}, Diskarte.INITIAL_STATE);
     var s = Diskarte.state;
     return s.totalReturned - s.totalWagered;
   };
+
+  // The "5-6" loan-shark rule (SRS §4.2.7): borrowing ₱X hands you ₱X now but
+  // creates a debt of 1.2×X. Unpaid debt then compounds +20%/week (budget.js).
+  Diskarte.LOAN_RATE = 1.2;
+  Diskarte.borrow = function (amount) {
+    var s = Diskarte.state;
+    Diskarte.update({ cash: s.cash + amount, debt: s.debt + Math.round(amount * Diskarte.LOAN_RATE) });
+    return Diskarte.state.debt;
+  };
 })();

@@ -49,8 +49,9 @@ window.Diskarte = window.Diskarte || {};
           apply: function () { set('cash', S().cash - 500); return 'Nabili ang gamot. Ginhawa kay Lola. (−₱500)'; } },
         { id: 'borrow', label: 'Borrow via 5-6',
           apply: function () {
-            // Borrow ₱500 and spend it on medicine: net cash 0, debt = 1.2×500.
-            set('debt', S().debt + Math.round(500 * 1.2));
+            // Borrow ₱500 then spend it on medicine: net cash 0, debt = 1.2×500.
+            Diskarte.borrow(500);
+            set('cash', S().cash - 500);
             return 'Nangutang sa 5-6. Debt +₱600 — lalaki \'to kapag \'di nabayaran.';
           } },
         { id: 'delay', label: 'Delay / ask around',

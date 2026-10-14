@@ -496,3 +496,81 @@ html, body {
 .spin__result.is-lose .spin__big { color: var(--red); }
 .spin__sub { font-size: 18px; color: var(--text); }
 .spin__flat { font-size: 15px; color: var(--muted); margin-top: 6px; }
+
+/* ===================== Compulsion / Consequence (M5) ===================== */
+/* urge nudge — the "one more spin" interrupt */
+.urge {
+  background: rgba(230, 57, 70, 0.14);
+  border: 1px dashed var(--red);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 8px 0;
+}
+.urge__txt {
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--red);
+  text-align: center;
+}
+
+/* compulsion band chip on the consequence screen */
+.conseq__band {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+  padding: 7px 9px;
+  margin: 8px 0 4px;
+}
+.conseq__band.is-control { border-color: var(--green); }
+.conseq__band.is-urge    { border-color: var(--warm); }
+.conseq__band.is-hooked,
+.conseq__band.is-addiction { border-color: var(--red); }
+.conseq__bandK { font-family: var(--font-display); font-size: 7px; color: var(--muted); }
+.conseq__bandV { font-family: var(--font-display); font-size: 8px; color: var(--text); }
+.conseq__note { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+
+/* deltas list */
+.conseq__list {
+  background: var(--panel);
+  border: 1px solid rgba(241, 250, 238, 0.10);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0 auto;
+}
+.conseq__listTitle {
+  font-family: var(--font-display);
+  font-size: 7px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.conseq__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 16px;
+  color: var(--muted);
+  padding: 3px 0;
+}
+.conseq__k { color: var(--text); }
+.conseq__v { font-family: var(--font-display); font-size: 9px; }
+.conseq__v.is-good { color: var(--green); }
+.conseq__v.is-bad  { color: var(--red); }
+
+/* game-over banner */
+.conseq__gameover {
+  background: rgba(230, 57, 70, 0.14);
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+}
+.conseq__goHead {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+.conseq__goSub { font-size: 15px; color: var(--text); line-height: 1.2; }

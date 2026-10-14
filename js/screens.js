@@ -57,6 +57,24 @@ window.Diskarte = window.Diskarte || {};
 
   function fmtPeso(n) { return '₱' + Math.round(n).toLocaleString('en-US'); }
 
+  // Snapshot the economy at the start of a week so the Consequence screen can
+  // show what changed. Taken on every Hub entry (week start, Flow Spec §1).
+  function snapshotWeek() {
+    var s = Diskarte.state;
+    Diskarte.state.weekStart = {
+      cash: s.cash, savings: s.savings, debt: s.debt,
+      meterFood: s.meterFood, meterEnergy: s.meterEnergy, meterTrust: s.meterTrust,
+      compulsion: s.compulsion
+    };
+  }
+
+  // An "unprompted one-more-spin" nudge — the Urge band effect (compulsion ≥ 40).
+  function urgeNudge(text) {
+    var n = el('div', 'urge');
+    n.appendChild(el('div', 'urge__txt', text));
+    return n;
+  }
+
   // ----- S3 Budget Allocation screen (M2) -----
   // A stepper per need + an optional Savings row, a live remainder readout,
   // and a Confirm button that commits the draft (can't over-spend) then goes
@@ -110,10 +128,13 @@ window.Diskarte = window.Diskarte || {};
       return { key: key, valEl: valEl, minus: minus, plus: plus };
     }
 
+    // Hooked band locks the safe option — you can't move money to savings.
+    var hooked = Diskarte.compulsion.safeOptionsLocked();
+
     B.NEEDS.forEach(function (n) {
       rowRefs.push(makeRow(n.key, n.label, 'of ' + fmtPeso(n.cost)));
     });
-    rowRefs.push(makeRow('savings', 'Savings', 'buffer'));
+    rowRefs.push(makeRow('savings', 'Savings', hooked ? 'locked · Hooked' : 'buffer'));
 
     var actions = el('div', 'scr__actions');
     var confirm = el('button', 'btn btn--green', 'Confirm allocation');
@@ -131,7 +152,7 @@ window.Diskarte = window.Diskarte || {};
       rowRefs.forEach(function (r) {
         r.valEl.textContent = fmtPeso(draft[r.key] || 0);
         r.minus.disabled = (draft[r.key] || 0) <= 0;
-        r.plus.disabled = rem <= 0;
+        r.plus.disabled = rem <= 0 || (r.key === 'savings' && hooked);
       });
     }
     refresh();
@@ -334,6 +355,12 @@ window.Diskarte = window.Diskarte || {};
     scr.appendChild(card);
     scr.appendChild(buildOddsTracker());
 
+    // Urge band: the chase gets a push.
+    if (Diskarte.compulsion.isUrge()) {
+      scr.appendChild(urgeNudge('Isa pa! Balik mo lahat sa isang spin. (' +
+        Diskarte.compulsion.band().label + ')'));
+    }
+
     var actions = el('div', 'scr__actions');
     var again = el('button', 'btn btn--red', 'Play again');
     again.addEventListener('click', function () { Diskarte.screens.show('spin'); });
@@ -341,6 +368,86 @@ window.Diskarte = window.Diskarte || {};
     stop.addEventListener('click', function () { Diskarte.screens.show('conseq'); });
     actions.appendChild(again);
     actions.appendChild(stop);
+    scr.appendChild(actions);
+  }
+
+  // ----- S8 Consequence / Debt screen (M5) -----
+  // Applies this week's allocation to the meters (Flow Spec S8), summarises the
+  // week's deltas vs the Hub snapshot, shows the compulsion band + its effect,
+  // offers a 5-6 loan, and triggers the addiction game-over at compulsion 100.
+  function buildConseq(scr) {
+    Diskarte.budget.applyAllocationToMeters();   // idempotent within the week
+
+    var s = Diskarte.state;
+    var start = s.weekStart || {};
+    var gameOver = Diskarte.compulsion.isGameOver();
+
+    scr.appendChild(el('div', 'scr__tag', 'S8 · Consequence · M5'));
+    scr.appendChild(el('div', 'scr__title', gameOver ? 'Game Over' : 'Consequence'));
+
+    if (gameOver) {
+      Diskarte.state.loseReason = 'addiction';   // M6 uses this on the end screen
+      var go = el('div', 'conseq__gameover');
+      go.appendChild(el('div', 'conseq__goHead', 'Addiction'));
+      go.appendChild(el('div', 'conseq__goSub', 'Umabot sa 100 ang compulsion. Hindi na mapigil.'));
+      scr.appendChild(go);
+    }
+
+    // compulsion band + what it does
+    var band = Diskarte.compulsion.band();
+    var bandBox = el('div', 'conseq__band is-' + band.id);
+    bandBox.appendChild(el('span', 'conseq__bandK', 'Compulsion'));
+    bandBox.appendChild(el('span', 'conseq__bandV', s.compulsion + ' · ' + band.label));
+    scr.appendChild(bandBox);
+    var note = {
+      urge: 'Urge: may kumakalabit na "isa pa".',
+      hooked: 'Hooked: naka-lock ang Savings sa budget.'
+    }[band.id];
+    if (note) scr.appendChild(el('div', 'conseq__note', note));
+
+    // deltas vs the start of the week ([label, delta, isMoney, upIsBad])
+    var fields = [
+      ['Cash', s.cash - (start.cash || 0), true, false],
+      ['Savings', s.savings - (start.savings || 0), true, false],
+      ['Debt', s.debt - (start.debt || 0), true, true],
+      ['Food', s.meterFood - (start.meterFood || 0), false, false],
+      ['Energy', s.meterEnergy - (start.meterEnergy || 0), false, false],
+      ['Trust', s.meterTrust - (start.meterTrust || 0), false, false],
+      ['Compulsion', s.compulsion - (start.compulsion || 0), false, true]
+    ];
+    var list = el('div', 'conseq__list');
+    list.appendChild(el('div', 'conseq__listTitle', 'Changes this week'));
+    var any = false;
+    fields.forEach(function (f) {
+      var d = f[1];
+      if (d === 0) return;
+      any = true;
+      var row = el('div', 'conseq__row');
+      row.appendChild(el('span', 'conseq__k', f[0]));
+      var txt = (d > 0 ? '+' : '−') + (f[2] ? fmtPeso(Math.abs(d)) : Math.abs(d));
+      var good = f[3] ? d < 0 : d > 0;     // debt/compulsion: down is good
+      row.appendChild(el('span', 'conseq__v ' + (good ? 'is-good' : 'is-bad'), txt));
+      list.appendChild(row);
+    });
+    if (!any) list.appendChild(el('div', 'conseq__row', 'Walang pagbabago.'));
+    scr.appendChild(list);
+
+    var actions = el('div', 'scr__actions');
+    if (gameOver) {
+      var end = el('button', 'btn btn--red', 'See the damage');
+      end.addEventListener('click', function () { Diskarte.screens.show('end_lose'); });
+      actions.appendChild(end);
+    } else {
+      var borrow = el('button', 'btn btn--ghost', 'Borrow ₱500 via 5-6 (owe ₱600)');
+      borrow.addEventListener('click', function () {
+        Diskarte.borrow(500);
+        Diskarte.screens.show('conseq');   // re-render to show the new debt
+      });
+      actions.appendChild(borrow);
+      var cont = el('button', 'btn', 'Continue');
+      cont.addEventListener('click', function () { Diskarte.screens.show('debrief'); });
+      actions.appendChild(cont);
+    }
     scr.appendChild(actions);
   }
 
@@ -365,11 +472,17 @@ window.Diskarte = window.Diskarte || {};
       // Custom layout: live HUD on top, a sprite placeholder in the middle
       // (real art is M8), and the Plan Budget action appended by render().
       build: function (scr) {
+        snapshotWeek();                 // mark the start of this week
         Diskarte.hud.mount(scr);
 
         var scene = el('div', 'hub__scene');
         scene.appendChild(el('div', 'scr__tag', this.tag));
         scene.appendChild(el('div', 'scr__title', this.title));
+        // Urge band: an unprompted nudge back toward the phone.
+        if (Diskarte.compulsion.isUrge()) {
+          scene.appendChild(urgeNudge('Kati sa kamay… isa pa kaya? (' +
+            Diskarte.compulsion.band().label + ')'));
+        }
         var sprite = el('div', 'hub__sprite', '[ character / room — M8 ]');
         scene.appendChild(sprite);
         scr.appendChild(scene);
@@ -406,11 +519,9 @@ window.Diskarte = window.Diskarte || {};
     },
     conseq: {
       id: 'conseq', tag: 'S8 · Consequence / Debt · M5',
-      title: 'Consequence\n/ Debt',
-      desc: 'Meters, cash and debt update. Loan-shark (5-6) offer. Compulsion band warnings.',
-      // Flow Spec S8: apply this week's allocation to the meters (M5 builds the
-      // full screen; the meter pass is wired here now so M2 is testable).
-      actions: [{ label: 'Continue', to: 'debrief', do: function () { Diskarte.budget.applyAllocationToMeters(); } }]
+      title: 'Consequence / Debt',
+      // Full screen: applies meters, shows deltas, 5-6 loan, band + game-over.
+      build: function (scr) { buildConseq(scr); }
     },
     debrief: {
       id: 'debrief', tag: 'S9 · Weekly Debrief · M6',

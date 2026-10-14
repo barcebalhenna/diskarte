@@ -10,12 +10,11 @@ window.Diskarte = window.Diskarte || {};
 (function () {
   var SEGMENTS = 10;        // each bar is 10 blocks; one block = 10 points
 
-  // Compulsion bands (SRS §6 thresholds). Effects arrive in M5; this is label-only.
+  // Compulsion band from the shared authority (compulsion.js). Maps its id to
+  // the bar's colour class (is-control / is-urge / is-hooked / is-addiction).
   function compulsionBand(v) {
-    if (v >= 100) return { cls: 'is-addiction', label: 'Addiction' };
-    if (v >= 70)  return { cls: 'is-hooked',    label: 'Hooked' };
-    if (v >= 40)  return { cls: 'is-urge',      label: 'Urge' };
-    return { cls: 'is-control', label: 'In control' };
+    var b = Diskarte.compulsion.band(v);
+    return { cls: 'is-' + b.id, label: b.label };
   }
 
   // Need-meter colour band. SRS treats Energy < 20 as its danger point, so
