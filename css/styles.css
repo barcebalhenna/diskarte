@@ -276,3 +276,79 @@ html, body {
   cursor: pointer;
 }
 .dev__btn:hover { filter: brightness(1.2); }
+
+/* ===================== Budget Allocation (M2) ===================== */
+.bud__cash {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 6px;
+}
+.bud__rem {
+  color: var(--green);
+  border: 1px solid var(--green);
+  background: var(--night);
+}
+.bud__rem.is-zero {           /* buffer fully spent — warn, don't block */
+  color: var(--warm);
+  border-color: var(--warm);
+}
+.bud__hint {
+  font-size: 15px;
+  line-height: 1.1;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.bud__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: auto;
+}
+.bud__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid rgba(241, 250, 238, 0.10);
+  border-radius: 6px;
+  padding: 7px 8px;
+}
+.bud__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bud__name {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--text);
+}
+.bud__cost {
+  font-size: 13px;
+  color: var(--muted);
+}
+.bud__step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.bud__btn {
+  font-family: var(--font-display);
+  font-size: 11px;
+  width: 30px;
+  height: 30px;
+  color: var(--night);
+  background: var(--warm);
+  border: 2px solid var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+.bud__btn:hover:not(:disabled) { filter: brightness(1.08); }
+.bud__btn:active:not(:disabled) { transform: translateY(1px); }
+.bud__btn:disabled { opacity: 0.35; cursor: default; }
+.bud__val {
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--text);
+  min-width: 56px;
+  text-align: right;
+}

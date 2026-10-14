@@ -39,8 +39,8 @@ css/styles.css    palette vars, stage scaling, screen/button styles
 js/state.js       the single state object (SRS §6) + safe set/update/onChange
 js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
-js/screens.js     screen router + all 11 screens (placeholders at M0)
-js/budget.js      M2 — allocation + meter effects (stub)
+js/screens.js     screen router + all 11 screens; Budget screen built (M2)
+js/budget.js      M2 — allocation + meter drains + week advance (done)
 js/gamble.js      M4 — rigged odds model (stub, numbers from SRS App. B)
 js/compulsion.js  M5 — compulsion meter + bands (stub)
 js/events.js      M3 — life-event cards + dark-pattern ads (stub)
@@ -72,9 +72,18 @@ it). You should see the Title screen; you can click through all 11 screens.
   per SRS §6. A temporary dev panel (`dev.js`, backtick to toggle) mutates
   state to verify live binding and 0–100 clamping; delete its `<script>`
   line to remove it. Band *effects* and End-Week logic are M5/M2.
-- **Next: M2** — Budget Allocation screen: allocate income across needs with
-  a running remainder, block over-allocation, and apply under/over-funding to
-  meters on **End Week**. See the Build Plan.
+- **M2 (budget allocation): DONE.** Budget screen (S3) with a stepper per need
+  (+ optional Savings), live remainder, over-allocation blocked. Per the Flow
+  Spec the weekly loop is split: S3 Confirm commits the draft (spends cash,
+  moves savings, stores the allocation); S8 Continue applies under-funding
+  drains to meters (proportional; full funding = stable); S9 Next Week advances
+  the week (+income, debt ×1.2, compulsion decay). That logic lives in
+  `budget.js` and is wired into the S8/S9 placeholders so it's testable now;
+  M5/M6 will build those screens out around it. Under-funding drain sizes are a
+  tunable prototype choice (SRS gives costs/meters, not magnitudes).
+- **Next: M3** — Life-event card system driven by data; implement the
+  Appendix C events for weeks 1–3 (1–3 choices each, applying cost/consequence).
+  See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

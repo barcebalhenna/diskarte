@@ -21,7 +21,12 @@ Diskarte.INITIAL_STATE = {
   awareness: 0,            // 0..100 ("spot the manipulation" score)
   scholarshipActive: true,
   path: 'sandbox',         // 'A' | 'B' | 'sandbox'
-  muted: false
+  muted: false,
+
+  // --- weekly-loop bookkeeping (M2+). Reset with the rest on replay. ---
+  allocation: null,        // this week's committed need funding (set at S3)
+  allocationApplied: false,// guard so S8 applies meter drains only once
+  gambledThisWeek: false   // M4 sets true on a gamble; drives compulsion decay
 };
 
 // Live state object. Reset at game start / replay.
