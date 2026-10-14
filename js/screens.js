@@ -185,6 +185,165 @@ window.Diskarte = window.Diskarte || {};
     });
   }
 
+  // ----- Odds tracker (M4): always visible on the gambling screens -----
+  // Shows the TRUE win % for the next spin, total wagered/returned, and the
+  // net (red when negative). This is the ethical core — losses stay legible.
+  function buildOddsTracker() {
+    var G = Diskarte.gamble, s = Diskarte.state;
+    var wrap = el('div', 'odds');
+    wrap.appendChild(el('div', 'odds__title', 'ODDS TRACKER'));
+    var grid = el('div', 'odds__grid');
+
+    function cell(k, v, cls) {
+      var c = el('div', 'odds__cell');
+      c.appendChild(el('span', 'odds__k', k));
+      c.appendChild(el('span', 'odds__v' + (cls ? ' ' + cls : ''), v));
+      grid.appendChild(c);
+    }
+
+    var net = G.net();
+    var netStr = net === 0 ? fmtPeso(0) : (net > 0 ? '+' : '−') + fmtPeso(Math.abs(net));
+    cell('True win', G.trueWinPct() + '%');
+    cell('Wagered', fmtPeso(s.totalWagered));
+    cell('Returned', fmtPeso(s.totalReturned));
+    cell('Net', netStr, net < 0 ? 'is-neg' : (net > 0 ? 'is-pos' : ''));
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  // Fake countdown for the ad's false-urgency pattern. It loops forever (the
+  // "offer" never really ends) and clears itself once its node leaves the DOM.
+  // The first paint is unconditional (the node isn't attached yet during
+  // build); the interval guards on isConnected so it stops after navigation.
+  function startFakeCountdown(node, seconds) {
+    var t = seconds;
+    function label(n) { return '⏱ Offer ends in 00:' + (n < 10 ? '0' : '') + n; }
+    node.textContent = label(t);
+    var id = setInterval(function () {
+      if (!node.isConnected) { clearInterval(id); return; }
+      t = (t <= 0) ? seconds : t - 1;
+      node.textContent = label(t);
+    }, 1000);
+  }
+
+  // ----- S5 Temptation Ad screen (M4) -----
+  // A phone ad packed with real dark patterns (SRS §4.2.8): false urgency,
+  // social proof, free-first bait, fake authority, near-miss. Play -> minigame;
+  // Report/Dismiss -> awareness +1 and skip straight to the consequence.
+  function buildAd(scr) {
+    scr.appendChild(el('div', 'scr__tag', 'S5 · Temptation Ad · M4'));
+
+    var ad = el('div', 'ad');
+    var timer = el('div', 'ad__timer');
+    ad.appendChild(timer);
+    startFakeCountdown(timer, 15);
+    ad.appendChild(el('div', 'ad__head', '🎁 Claim your FREE ₱100 bonus spin!'));
+    ad.appendChild(el('div', 'ad__social', '🔥 47 people just won ₱10,000 — ikaw na!'));
+    ad.appendChild(el('div', 'ad__endorser', '✔ "Sinubukan ko ’to" — Verified™ idol'));
+    ad.appendChild(el('div', 'ad__nearmiss', 'Sayang, muntik na kanina! One more spin — 7 7 7'));
+    scr.appendChild(ad);
+
+    scr.appendChild(el('div', 'ad__disclaim',
+      'Dark patterns above: fake countdown, "winners" ticker, free bait, fake endorser, near-miss.'));
+
+    var actions = el('div', 'scr__actions');
+    var play = el('button', 'btn btn--red', 'Play');
+    play.addEventListener('click', function () { Diskarte.screens.show('spin'); });
+    var dismiss = el('button', 'btn btn--green', 'Report / Dismiss');
+    dismiss.addEventListener('click', function () {
+      Diskarte.set('awareness', Diskarte.state.awareness + 1);  // spotted it
+      Diskarte.screens.show('conseq');
+    });
+    actions.appendChild(play);
+    actions.appendChild(dismiss);
+    scr.appendChild(actions);
+  }
+
+  // ----- S6 Gambling Minigame screen (M4) -----
+  // Odds tracker on top, a bet-tier picker, and SPIN. Stop bails to the
+  // consequence. If cash is below the minimum bet, the chase hits its floor.
+  function buildSpin(scr) {
+    var G = Diskarte.gamble, s = Diskarte.state;
+    scr.appendChild(el('div', 'scr__tag', 'S6 · Gambling Minigame · M4'));
+    scr.appendChild(el('div', 'scr__title', 'Spin'));
+    scr.appendChild(buildOddsTracker());
+
+    var minBet = G.BET_TIERS[0];
+    if (s.cash < minBet) {
+      scr.appendChild(el('div', 'ad__disclaim',
+        'Wala nang pang-taya (cash < ' + fmtPeso(minBet) + '). The chase has a floor.'));
+      var a0 = el('div', 'scr__actions');
+      var stop0 = el('button', 'btn btn--ghost', 'Stop');
+      stop0.addEventListener('click', function () { Diskarte.screens.show('conseq'); });
+      a0.appendChild(stop0);
+      scr.appendChild(a0);
+      return;
+    }
+
+    scr.appendChild(el('div', 'bet__label', 'Choose your bet'));
+    var tiers = el('div', 'bet');
+    var selected = minBet;                 // default to the cheapest tier
+    var tierBtns = [];
+    G.BET_TIERS.forEach(function (b) {
+      var btn = el('button', 'bet__tier', fmtPeso(b));
+      if (!G.canBet(b)) btn.disabled = true;
+      if (b === selected) btn.classList.add('is-sel');
+      btn.addEventListener('click', function () {
+        if (!G.canBet(b)) return;
+        selected = b;
+        tierBtns.forEach(function (x) { x.el.classList.toggle('is-sel', x.b === selected); });
+      });
+      tierBtns.push({ b: b, el: btn });
+      tiers.appendChild(btn);
+    });
+    scr.appendChild(tiers);
+
+    var actions = el('div', 'scr__actions');
+    var spin = el('button', 'btn btn--red', 'SPIN');
+    spin.addEventListener('click', function () {
+      if (G.play(selected)) Diskarte.screens.show('result');
+    });
+    var stop = el('button', 'btn btn--ghost', 'Stop');
+    stop.addEventListener('click', function () { Diskarte.screens.show('conseq'); });
+    actions.appendChild(spin);
+    actions.appendChild(stop);
+    scr.appendChild(actions);
+  }
+
+  // ----- S7 Result / The Chase screen (M4) -----
+  // Reveals the last spin. Wins are deliberately flat (NFR-ETH-2); the odds
+  // tracker stays on screen. "Play again" is the chase; "Stop" exits.
+  function buildResult(scr) {
+    var r = Diskarte.gamble.lastResult();
+    scr.appendChild(el('div', 'scr__tag', 'S7 · Result / The Chase · M4'));
+
+    var card = el('div', 'spin__result ' + (r && r.win ? 'is-win' : 'is-lose'));
+    if (!r) {
+      card.appendChild(el('div', 'spin__big', '—'));
+    } else if (r.win) {
+      card.appendChild(el('div', 'spin__big', 'WIN'));
+      card.appendChild(el('div', 'spin__sub', '+' + fmtPeso(r.delta) +
+        '  (' + fmtPeso(r.bet) + ' → ' + fmtPeso(r.ret) + ')'));
+      card.appendChild(el('div', 'spin__flat',
+        r.firstPlay ? 'Ang sarap, ’di ba? (beginner’s luck)' : 'Panalo… sa ngayon.'));
+    } else {
+      card.appendChild(el('div', 'spin__big', 'LOSE'));
+      card.appendChild(el('div', 'spin__sub', '−' + fmtPeso(r.bet)));
+      card.appendChild(el('div', 'spin__flat', 'Lamon ng bahay. Balik na sa budget?'));
+    }
+    scr.appendChild(card);
+    scr.appendChild(buildOddsTracker());
+
+    var actions = el('div', 'scr__actions');
+    var again = el('button', 'btn btn--red', 'Play again');
+    again.addEventListener('click', function () { Diskarte.screens.show('spin'); });
+    var stop = el('button', 'btn btn--green', 'Stop');
+    stop.addEventListener('click', function () { Diskarte.screens.show('conseq'); });
+    actions.appendChild(again);
+    actions.appendChild(stop);
+    scr.appendChild(actions);
+  }
+
   // --- Screen definitions (placeholders). Transitions = Flow Spec §2. ---
   var SCREENS = {
     title: {
@@ -233,26 +392,17 @@ window.Diskarte = window.Diskarte || {};
     ad: {
       id: 'ad', tag: 'S5 · Temptation Ad (phone) · M4', phone: true,
       title: 'Temptation Ad',
-      desc: 'A gambling ad on your phone, full of dark patterns. Play, or report/dismiss?',
-      actions: [
-        { label: 'Play', to: 'spin', variant: 'red' },
-        { label: 'Report / Dismiss', to: 'conseq', variant: 'green' }
-      ]
+      build: function (scr) { buildAd(scr); }
     },
     spin: {
       id: 'spin', tag: 'S6 · Gambling Minigame (phone) · M4', phone: true,
-      title: 'Gambling\nMinigame',
-      desc: 'Rigged-but-honest spin. The odds tracker is always on screen (M4).',
-      actions: [{ label: 'Spin', to: 'result', variant: 'red' }]
+      title: 'Gambling Minigame',
+      build: function (scr) { buildSpin(scr); }
     },
     result: {
       id: 'result', tag: 'S7 · Result / The Chase · M4', phone: true,
-      title: 'Result /\nThe Chase',
-      desc: 'Win or loss revealed. “Play again?” is the chase.',
-      actions: [
-        { label: 'Play again (chase)', to: 'spin', variant: 'red' },
-        { label: 'Stop', to: 'conseq', variant: 'ghost' }
-      ]
+      title: 'Result / The Chase',
+      build: function (scr) { buildResult(scr); }
     },
     conseq: {
       id: 'conseq', tag: 'S8 · Consequence / Debt · M5',

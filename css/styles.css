@@ -375,3 +375,124 @@ html, body {
   padding-top: 10px;
   border-top: 1px dashed rgba(141, 153, 174, 0.4);
 }
+
+/* ===================== Gambling / Ad (M4) ===================== */
+/* odds tracker — the always-on, honest ledger */
+.odds {
+  background: var(--night);
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  padding: 8px;
+  margin: 8px 0;
+}
+.odds__title {
+  font-family: var(--font-display);
+  font-size: 7px;
+  color: var(--red);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.odds__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.odds__cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--panel);
+  border-radius: 4px;
+  padding: 5px 7px;
+}
+.odds__k { font-size: 14px; color: var(--muted); }
+.odds__v {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--text);
+}
+.odds__v.is-neg { color: var(--red); }
+.odds__v.is-pos { color: var(--green); }
+
+/* the ad — garish on purpose */
+.ad {
+  background: linear-gradient(160deg, #2a0f1a, var(--panel));
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0;
+}
+.ad__timer {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--warm);
+  text-align: center;
+}
+.ad__head {
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text);
+  text-align: center;
+}
+.ad__social { font-size: 16px; color: var(--warm); text-align: center; }
+.ad__endorser,
+.ad__nearmiss { font-size: 14px; color: var(--muted); text-align: center; }
+.ad__disclaim {
+  font-size: 13px;
+  line-height: 1.15;
+  color: var(--muted);
+  margin: 4px 0 auto;
+}
+
+/* bet-tier picker */
+.bet__label {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--muted);
+  margin: 6px 0 4px;
+}
+.bet {
+  display: flex;
+  gap: 8px;
+  margin-bottom: auto;
+}
+.bet__tier {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+  padding: 12px 4px;
+  cursor: pointer;
+}
+.bet__tier.is-sel {
+  border-color: var(--red);
+  color: var(--red);
+}
+.bet__tier:disabled { opacity: 0.35; cursor: default; }
+
+/* result card */
+.spin__result {
+  text-align: center;
+  border-radius: 8px;
+  padding: 18px 12px;
+  margin: 8px 0;
+  border: 2px solid var(--muted);
+}
+.spin__result.is-win  { border-color: var(--warm); }
+.spin__result.is-lose { border-color: var(--red); }
+.spin__big {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.spin__result.is-win  .spin__big { color: var(--warm); }
+.spin__result.is-lose .spin__big { color: var(--red); }
+.spin__sub { font-size: 18px; color: var(--text); }
+.spin__flat { font-size: 15px; color: var(--muted); margin-top: 6px; }

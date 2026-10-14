@@ -41,7 +41,7 @@ js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
-js/gamble.js      M4 — rigged odds model (stub, numbers from SRS App. B)
+js/gamble.js      M4 — rigged odds model + spin (done, SRS App. B)
 js/compulsion.js  M5 — compulsion meter + bands (stub)
 js/events.js      M3 — data-driven life-event cards, 1 per week (done)
 js/debrief.js     M6 — weekly debrief + win/lose checks (stub)
@@ -89,9 +89,18 @@ it). You should see the Title screen; you can click through all 11 screens.
   defined and ready for M7 scripting). Choices disable when unaffordable.
   Meter-hit magnitudes are a documented, tunable prototype choice (SRS fixes
   the peso costs only). Gambling ADS (also in Appendix C) are M4.
-- **Next: M4** — Temptation ad (≥3 dark patterns, Play / Report-Dismiss) and
-  the rigged gambling minigame with the always-on odds tracker (SRS §4.2.5 /
-  Appendix B). See the Build Plan.
+- **M4 (temptation + gambling): DONE.** S5 ad with 5 dark patterns (fake
+  countdown, winners ticker, free bait, fake endorser, near-miss) + Play /
+  Report-Dismiss (dismiss → awareness +1 → skip to consequence). `gamble.js`
+  runs the rigged model: first play 70%/1.8× (beginner's luck), every play
+  after 28%/1.9×; a spin updates cash/wagered/returned, compulsion +12,
+  gambleCount +1, and flags the week gambled. S6 has a bet-tier picker
+  (₱50/100/200, unaffordable disabled) + SPIN; S7 reveals the result (wins
+  deliberately flat per NFR-ETH-2). The always-on **odds tracker** shows the
+  true next-spin win %, totals, and net (red when negative) on S6 and S7.
+- **Next: M5** — Compulsion bands (urge popups at 40, locked safe options at
+  70, game-over at 100), loan-shark 5-6 borrowing, and a Consequence screen
+  summarizing the week's deltas. See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's
