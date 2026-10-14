@@ -44,7 +44,7 @@ js/budget.js      M2 — allocation + meter drains + week advance (done)
 js/gamble.js      M4 — rigged odds model + spin (done, SRS App. B)
 js/compulsion.js  M5 — compulsion band authority + effects (done)
 js/events.js      M3 — data-driven life-event cards, 1 per week (done)
-js/debrief.js     M6 — weekly debrief + win/lose checks (stub)
+js/debrief.js     M6 — debrief + win/lose + hard-fail eval (done)
 js/paths.js       M7 — scripted Path A/B beats (stub)
 js/main.js        boot + stage scaling
 assets/           sprites / fonts / audio (empty; filled at M8)
@@ -107,10 +107,20 @@ it). You should see the Title screen; you can click through all 11 screens.
   weekly +20% compounding already in `budget.endWeek`); the Lola event reuses
   it. The S8 Consequence screen applies the week's meter drains, shows deltas
   vs the Hub snapshot (color-coded), offers a 5-6 loan, and surfaces the band.
-- **Next: M6** — Weekly debrief (real spend/save/gamble numbers + one
-  reflective line), win/lose evaluation after Week 3 (§4.2.10 / Flow Spec
-  hard-fail + win check), End-Win/Lose screens with the FR-15 support message,
-  and Replay. See the Build Plan.
+- **M6 (debrief, win/lose, end, replay): DONE.** `debrief.js` owns the
+  evaluation: `checkWin` (buffer ≥500, scholarship, compulsion <70, no meter 0),
+  `hardFail` (compulsion 100 / scholarship lost / debt >2000 / any meter 0 for
+  two weeks), and `resolveWeek` (once/week: Trust 0 ⇒ scholarship lost, zero-
+  meter streak). The S8 Consequence runs the full hard-fail; S9 Debrief shows
+  the week's own gambling numbers + a reflective line + the FR-15 support
+  message, lets you move leftover cash to savings (Flow Spec S9; Hooked locks
+  it), then advances (weeks 1–2) or runs the win/lose check (week 3) into the
+  End-Win / End-Lose screens (final figures, reason, Replay → reset → S1).
+  **The full M0–M6 loop is playable: both a natural win (save + raket → ₱700)
+  and the gambling spiral (→ addiction/debt/scholarship lose) reproduce.**
+- **Next: M7** — thread the scripted golden paths (A spiral→lose, B resist→win)
+  from the Flow Spec beat tables via `paths.js`, plus a launcher and the
+  sandbox toggle. Needs the Flow Spec (already in repo). See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

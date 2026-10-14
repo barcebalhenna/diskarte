@@ -574,3 +574,87 @@ html, body {
   margin-bottom: 6px;
 }
 .conseq__goSub { font-size: 15px; color: var(--text); line-height: 1.2; }
+
+/* ===================== Debrief + End screens (M6) ===================== */
+.debrief__card {
+  background: var(--panel);
+  border: 1px solid rgba(241, 250, 238, 0.10);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+}
+.debrief__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 16px;
+  color: var(--muted);
+  padding: 3px 0;
+}
+.debrief__k { color: var(--text); }
+.debrief__v { font-family: var(--font-display); font-size: 9px; color: var(--text); }
+.debrief__v.is-good { color: var(--green); }
+.debrief__v.is-bad  { color: var(--red); }
+.debrief__reflect {
+  font-size: 17px;
+  line-height: 1.2;
+  color: var(--warm);
+  margin-bottom: 8px;
+}
+
+/* support message (FR-15) */
+.support {
+  background: rgba(67, 170, 139, 0.12);
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0 auto;
+}
+.support__k {
+  font-family: var(--font-display);
+  font-size: 7px;
+  color: var(--green);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.support__txt { font-size: 15px; line-height: 1.25; color: var(--text); }
+
+/* end screens */
+.end__card {
+  border-radius: 8px;
+  padding: 16px 12px;
+  margin: 8px 0;
+  text-align: center;
+  border: 2px solid var(--muted);
+}
+.end__card.is-win  { border-color: var(--green); background: rgba(67, 170, 139, 0.12); }
+.end__card.is-lose { border-color: var(--red);   background: rgba(230, 57, 70, 0.12); }
+.end__headline {
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.end__card.is-win .end__headline  { color: var(--green); }
+.end__card.is-lose .end__headline { color: var(--red); }
+.end__reason { font-size: 15px; color: var(--text); margin-top: 8px; line-height: 1.2; }
+
+.end__figures {
+  background: var(--panel);
+  border: 1px solid rgba(241, 250, 238, 0.10);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+}
+.end__frow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 15px;
+  color: var(--muted);
+  padding: 3px 0;
+}
+.end__fk { color: var(--text); }
+.end__fv { font-family: var(--font-display); font-size: 8px; color: var(--text); }
+.end__fv.is-good { color: var(--green); }
+.end__fv.is-bad  { color: var(--red); }

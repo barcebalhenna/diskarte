@@ -26,7 +26,11 @@ Diskarte.INITIAL_STATE = {
   // --- weekly-loop bookkeeping (M2+). Reset with the rest on replay. ---
   allocation: null,        // this week's committed need funding (set at S3)
   allocationApplied: false,// guard so S8 applies meter drains only once
-  gambledThisWeek: false   // M4 sets true on a gamble; drives compulsion decay
+  gambledThisWeek: false,  // M4 sets true on a gamble; drives compulsion decay
+  weekStart: null,         // economy snapshot at week start (debrief/consequence)
+  weekResolved: false,     // guard so S8's once-per-week eval runs once (M6)
+  zeroMeterStreak: 0,      // consecutive weeks ending with any meter at 0 (M6)
+  loseReason: null         // why the run ended (set on hard-fail / finish) (M6)
 };
 
 // Live state object. Reset at game start / replay.

@@ -115,6 +115,7 @@ window.Diskarte = window.Diskarte || {};
       Diskarte.set('compulsion', Diskarte.state.compulsion - 3);
     }
     Diskarte.state.gambledThisWeek = false; // fresh week
+    Diskarte.state.weekResolved = false;    // S8's once-per-week eval re-arms (M6)
     return true;
   }
 

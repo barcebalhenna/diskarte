@@ -64,7 +64,8 @@ window.Diskarte = window.Diskarte || {};
     Diskarte.state.weekStart = {
       cash: s.cash, savings: s.savings, debt: s.debt,
       meterFood: s.meterFood, meterEnergy: s.meterEnergy, meterTrust: s.meterTrust,
-      compulsion: s.compulsion
+      compulsion: s.compulsion,
+      totalWagered: s.totalWagered, totalReturned: s.totalReturned
     };
   }
 
@@ -377,19 +378,21 @@ window.Diskarte = window.Diskarte || {};
   // offers a 5-6 loan, and triggers the addiction game-over at compulsion 100.
   function buildConseq(scr) {
     Diskarte.budget.applyAllocationToMeters();   // idempotent within the week
+    Diskarte.debrief.resolveWeek();              // once/week: scholarship + zero streak
 
     var s = Diskarte.state;
     var start = s.weekStart || {};
-    var gameOver = Diskarte.compulsion.isGameOver();
+    var failReason = Diskarte.debrief.hardFail(); // full S8 hard-fail (Flow Spec)
+    var gameOver = !!failReason;
 
     scr.appendChild(el('div', 'scr__tag', 'S8 · Consequence · M5'));
     scr.appendChild(el('div', 'scr__title', gameOver ? 'Game Over' : 'Consequence'));
 
     if (gameOver) {
-      Diskarte.state.loseReason = 'addiction';   // M6 uses this on the end screen
+      Diskarte.state.loseReason = failReason;    // the end screen reads this
       var go = el('div', 'conseq__gameover');
-      go.appendChild(el('div', 'conseq__goHead', 'Addiction'));
-      go.appendChild(el('div', 'conseq__goSub', 'Umabot sa 100 ang compulsion. Hindi na mapigil.'));
+      go.appendChild(el('div', 'conseq__goHead', 'GAME OVER'));
+      go.appendChild(el('div', 'conseq__goSub', Diskarte.debrief.reasonText(failReason)));
       scr.appendChild(go);
     }
 
@@ -448,6 +451,150 @@ window.Diskarte = window.Diskarte || {};
       cont.addEventListener('click', function () { Diskarte.screens.show('debrief'); });
       actions.appendChild(cont);
     }
+    scr.appendChild(actions);
+  }
+
+  // ----- S9 Weekly Debrief screen (M6) -----
+  // The player's own numbers for the week + one reflective line + the FR-15
+  // support message. Week < 3 advances; Week 3 runs the win/lose evaluation.
+  function buildDebrief(scr) {
+    var s = Diskarte.state;
+    var g = Diskarte.debrief.thisWeekGambling();
+    var isFinal = s.week >= 3;
+
+    scr.appendChild(el('div', 'scr__tag', 'S9 · Weekly Debrief · M6'));
+    scr.appendChild(el('div', 'scr__title', 'Debrief — Week ' + s.week));
+
+    var card = el('div', 'debrief__card');
+    function line(k, v, cls) {
+      var row = el('div', 'debrief__row');
+      row.appendChild(el('span', 'debrief__k', k));
+      row.appendChild(el('span', 'debrief__v' + (cls ? ' ' + cls : ''), v));
+      card.appendChild(row);
+    }
+    line('Wagered this week', fmtPeso(g.wagered));
+    line('Returned', fmtPeso(g.returned));
+    line('Net on bets', (g.net >= 0 ? '+' : '−') + fmtPeso(Math.abs(g.net)),
+      g.net < 0 ? 'is-bad' : (g.net > 0 ? 'is-good' : ''));
+    line('Cash on hand', fmtPeso(s.cash));
+    line('Savings', fmtPeso(s.savings) + ' / ₱500', s.savings >= 500 ? 'is-good' : '');
+    scr.appendChild(card);
+
+    var reflect;
+    if (g.net < 0) {
+      var pct = Math.round(Math.abs(g.net) / 500 * 100);
+      reflect = 'Nilustay mo ₱' + Math.abs(g.net).toLocaleString('en-US') +
+        ' sa taya — ' + pct + '% sana ng ₱500 goal.';
+    } else if (s.savings > 0) {
+      reflect = 'May naipon kang ' + fmtPeso(s.savings) + '. Diskarte, ’di diskarte-swerte.';
+    } else {
+      reflect = 'Walang taya, wala pang ipon. Okay lang — tuloy ang laban.';
+    }
+    scr.appendChild(el('div', 'debrief__reflect', reflect));
+
+    scr.appendChild(buildSupport());
+
+    var actions = el('div', 'scr__actions');
+
+    // Move leftover cash into savings (Flow Spec S9 — e.g. the week-3 raket's
+    // ₱250 reaches the buffer here). The Hooked band locks this safe option.
+    if (s.cash > 0 && !Diskarte.compulsion.safeOptionsLocked()) {
+      var toSave = el('button', 'btn btn--green', 'Move ₱' + s.cash.toLocaleString('en-US') + ' to savings');
+      toSave.addEventListener('click', function () {
+        Diskarte.update({ savings: Diskarte.state.savings + Diskarte.state.cash, cash: 0 });
+        Diskarte.screens.show('debrief');   // re-render with the updated buffer
+      });
+      actions.appendChild(toSave);
+    }
+
+    if (isFinal) {
+      var finish = el('button', 'btn btn--green', 'Finish the month');
+      finish.addEventListener('click', function () {
+        if (Diskarte.debrief.checkWin()) {
+          Diskarte.screens.show('end_win');
+        } else {
+          if (!Diskarte.state.loseReason) {
+            Diskarte.state.loseReason = Diskarte.debrief.hardFail() || 'no-buffer';
+          }
+          Diskarte.screens.show('end_lose');
+        }
+      });
+      actions.appendChild(finish);
+    } else {
+      var next = el('button', 'btn', 'Next Week');
+      next.addEventListener('click', function () {
+        Diskarte.budget.endWeek();
+        Diskarte.screens.show('hub');
+      });
+      actions.appendChild(next);
+    }
+    scr.appendChild(actions);
+  }
+
+  // FR-15 / NFR-ETH-4 support card (debrief + lose screens).
+  function buildSupport() {
+    var sup = el('div', 'support');
+    sup.appendChild(el('div', 'support__k', 'Kung kailangan mo ng tulong'));
+    sup.appendChild(el('div', 'support__txt', Diskarte.debrief.SUPPORT));
+    return sup;
+  }
+
+  // Final figures block for the end screens.
+  function buildFinalFigures() {
+    var s = Diskarte.state, net = Diskarte.netGambling();
+    var box = el('div', 'end__figures');
+    function f(k, v, cls) {
+      var r = el('div', 'end__frow');
+      r.appendChild(el('span', 'end__fk', k));
+      r.appendChild(el('span', 'end__fv' + (cls ? ' ' + cls : ''), v));
+      box.appendChild(r);
+    }
+    f('Savings', fmtPeso(s.savings), s.savings >= 500 ? 'is-good' : '');
+    f('Debt', fmtPeso(s.debt), s.debt > 0 ? 'is-bad' : '');
+    f('Net on bets', (net >= 0 ? '+' : '−') + fmtPeso(Math.abs(net)),
+      net < 0 ? 'is-bad' : (net > 0 ? 'is-good' : ''));
+    f('Compulsion', s.compulsion + ' · ' + Diskarte.compulsion.band().label);
+    f('Scholarship', s.scholarshipActive ? 'Intact' : 'Lost', s.scholarshipActive ? 'is-good' : 'is-bad');
+    f('Spotted ads', s.awareness + '');
+    return box;
+  }
+
+  // Replay resets to initial state and returns to Character Select (Flow Spec).
+  function replayButton(variant) {
+    var b = el('button', 'btn btn--' + variant, 'Replay');
+    b.addEventListener('click', function () {
+      Diskarte.resetState();
+      Diskarte.screens.show('char');
+    });
+    return b;
+  }
+
+  // ----- S10 End — Win -----
+  function buildEndWin(scr) {
+    scr.appendChild(el('div', 'scr__tag', 'S10 · End — Win · M6'));
+    scr.appendChild(el('div', 'scr__title', 'You Win'));
+    var card = el('div', 'end__card is-win');
+    card.appendChild(el('div', 'end__headline', 'Stability is the real win.'));
+    scr.appendChild(card);
+    scr.appendChild(buildFinalFigures());
+    var actions = el('div', 'scr__actions');
+    actions.appendChild(replayButton('green'));
+    scr.appendChild(actions);
+  }
+
+  // ----- S11 End — Lose -----
+  function buildEndLose(scr) {
+    var s = Diskarte.state;
+    scr.appendChild(el('div', 'scr__tag', 'S11 · End — Lose · M6'));
+    scr.appendChild(el('div', 'scr__title', 'Game Over'));
+    var card = el('div', 'end__card is-lose');
+    card.appendChild(el('div', 'end__headline', 'Hindi lahat ng diskarte, panalo.'));
+    if (s.loseReason) card.appendChild(el('div', 'end__reason', Diskarte.debrief.reasonText(s.loseReason)));
+    scr.appendChild(card);
+    scr.appendChild(buildFinalFigures());
+    scr.appendChild(buildSupport());
+    var actions = el('div', 'scr__actions');
+    actions.appendChild(replayButton('red'));
     scr.appendChild(actions);
   }
 
@@ -525,27 +672,18 @@ window.Diskarte = window.Diskarte || {};
     },
     debrief: {
       id: 'debrief', tag: 'S9 · Weekly Debrief · M6',
-      title: 'Weekly\nDebrief',
-      desc: 'Your own numbers, one reflective line. Then next week — or the ending after Week 3.',
-      // Flow Spec S9->S2: "Next Week" advances the week (+income, debt ×1.2,
-      // compulsion decay). M6 builds the real debrief; logic is wired here now.
-      actions: [
-        { label: 'Next Week', to: 'hub', do: function () { Diskarte.budget.endWeek(); } },
-        { label: 'Finish → WIN', to: 'end_win', variant: 'green' },
-        { label: 'Finish → LOSE', to: 'end_lose', variant: 'red' }
-      ]
+      title: 'Weekly Debrief',
+      build: function (scr) { buildDebrief(scr); }
     },
     end_win: {
       id: 'end_win', tag: 'S10 · End — Win · M6',
-      title: 'YOU WIN',
-      desc: 'Stability is the real win. Final figures + replay.',
-      actions: [{ label: 'Replay', to: 'char', variant: 'green' }]
+      title: 'You Win',
+      build: function (scr) { buildEndWin(scr); }
     },
     end_lose: {
       id: 'end_lose', tag: 'S11 · End — Lose · M6',
-      title: 'GAME OVER',
-      desc: 'The spiral recap + a non-judgmental support message (FR-15). Replay.',
-      actions: [{ label: 'Replay', to: 'char', variant: 'red' }]
+      title: 'Game Over',
+      build: function (scr) { buildEndLose(scr); }
     }
   };
 
