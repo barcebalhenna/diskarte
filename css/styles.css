@@ -119,14 +119,160 @@ html, body {
 /* screens that live "on the phone" get a reddish frame hint (gambling) */
 .scr--phone .scr__title { color: var(--red); }
 
-/* little HUD chip row placeholder (filled properly in M1) */
+/* ===================== Week Hub HUD (M1) ===================== */
 .hud {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--panel);
+  border: 2px solid rgba(241, 250, 238, 0.12);  /* faint --text edge */
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+/* week counter */
+.hud__week {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+
+/* money row: cash / savings / debt chips */
+.hud__money {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+.chip {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--text);
+  background: var(--night);
+  border: 1px solid rgba(241, 250, 238, 0.12);
+  border-radius: 4px;
+  padding: 5px 6px;
+}
+.chip--cash { color: var(--warm); }
+.chip--save.is-on { color: var(--green); border-color: var(--green); }
+.chip--debt.is-on { color: var(--red);   border-color: var(--red); }
+
+/* meters */
+.hud__meters { display: flex; flex-direction: column; gap: 6px; }
+.meter { display: flex; flex-direction: column; gap: 3px; }
+.meter__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   font-family: var(--font-display);
   font-size: 7px;
   color: var(--muted);
-  margin-bottom: 8px;
 }
-.hud span { background: var(--panel); border-radius: 4px; padding: 4px 6px; }
+.meter__val { color: var(--text); }
+
+/* segmented pixel bar: 10 blocks, square, hard edges (no rounding) */
+.meter__bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+}
+.seg {
+  flex: 1;
+  background: var(--night);                      /* empty block */
+  border: 1px solid rgba(241, 250, 238, 0.10);
+}
+/* filled blocks take their colour from the bar's band class */
+.meter__bar.is-good   .seg--on { background: var(--green); }
+.meter__bar.is-warn   .seg--on { background: var(--warm); }
+.meter__bar.is-danger .seg--on { background: var(--red); }
+
+/* compulsion meter: sits apart, red-leaning, locked until first gamble */
+.meter--comp { margin-top: 4px; }
+.meter__lock {
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 2px;
+}
+.meter--comp .meter__bar,
+.meter--comp .meter__lock { display: none; }     /* show one or the other */
+.meter--comp.is-locked .meter__lock { display: block; }
+.meter--comp:not(.is-locked) .meter__bar { display: flex; }
+
+/* compulsion bands climb warm -> red as the trap tightens */
+.meter__bar--comp.is-control .seg--on,
+.meter__bar--comp.is-urge    .seg--on { background: var(--warm); }
+.meter__bar--comp.is-hooked    .seg--on,
+.meter__bar--comp.is-addiction .seg--on { background: var(--red); }
+
+/* ---- Hub scene (sprite placeholder; real art is M8) ---- */
+.hub__scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.hub__sprite {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  border: 2px dashed rgba(141, 153, 174, 0.4);   /* --muted dashed */
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 16px;
+  text-align: center;
+}
+
+/* ===================== DEV panel (M1, temporary) ===================== */
+#dev-toggle {
+  position: fixed;
+  top: 8px;
+  right: 8px;                 /* right side: keeps the HUD visible while testing */
+  z-index: 50;
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--night);
+  background: var(--warm);
+  border: 2px solid var(--text);
+  border-radius: 4px;
+  padding: 5px 7px;
+  cursor: pointer;
+}
+#dev-panel {
+  position: fixed;
+  top: 36px;
+  right: 8px;
+  z-index: 50;
+  width: 220px;
+  background: var(--panel);
+  border: 2px solid var(--text);
+  border-radius: 6px;
+  padding: 8px;
+}
+#dev-panel[hidden] { display: none; }
+.dev__title {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.dev__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+.dev__btn {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  background: var(--night);
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+}
+.dev__btn:hover { filter: brightness(1.2); }

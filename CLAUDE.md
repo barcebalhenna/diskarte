@@ -36,7 +36,9 @@ When these and the code disagree, the **docs win** — update the code.
 ```
 index.html        loads everything (fixed script order)
 css/styles.css    palette vars, stage scaling, screen/button styles
-js/state.js       the single state object (SRS §6) — authoritative initials
+js/state.js       the single state object (SRS §6) + safe set/update/onChange
+js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
+js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens (placeholders at M0)
 js/budget.js      M2 — allocation + meter effects (stub)
 js/gamble.js      M4 — rigged odds model (stub, numbers from SRS App. B)
@@ -63,8 +65,16 @@ it). You should see the Title screen; you can click through all 11 screens.
 ## Current status
 - **M0 (scaffold & stage): DONE.** Router + 11 placeholder screens wired to
   the full state machine; stage scales/letterboxes; state object in place.
-- **Next: M1** — bind the Week Hub HUD (cash/savings/debt, Food/Energy/Trust
-  meters, compulsion, week counter) to `Diskarte.state`. See the Build Plan.
+- **M1 (state model & HUD): DONE.** `state.js` now has safe `set`/`update`/
+  `onChange` with per-field clamping; the Week Hub renders a live HUD
+  (week counter, cash/savings/debt chips, Food/Energy/Trust segmented bars,
+  compulsion bar). Compulsion stays locked (`???`) until the first gamble
+  per SRS §6. A temporary dev panel (`dev.js`, backtick to toggle) mutates
+  state to verify live binding and 0–100 clamping; delete its `<script>`
+  line to remove it. Band *effects* and End-Week logic are M5/M2.
+- **Next: M2** — Budget Allocation screen: allocate income across needs with
+  a running remainder, block over-allocation, and apply under/over-funding to
+  meters on **End Week**. See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

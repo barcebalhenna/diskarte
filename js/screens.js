@@ -16,25 +16,25 @@ window.Diskarte = window.Diskarte || {};
     return n;
   }
 
-  // Build a standard placeholder screen from a definition.
+  // Build a screen from a definition. A def may supply a custom build(scr)
+  // step (the Hub uses it for the live HUD); otherwise we render the
+  // standard placeholder body (tag / title / desc). Actions are appended
+  // for every screen either way.
   function render(def) {
+    // The HUD listens for state changes; detach it before we wipe the DOM so
+    // a change fired from another screen doesn't write to dead nodes.
+    if (Diskarte.hud) Diskarte.hud.unmount();
+
     mount.innerHTML = '';
     var scr = el('div', 'scr' + (def.phone ? ' scr--phone' : ''));
 
-    // Tiny live HUD on the Week Hub to prove state is wired (M1 expands this).
-    if (def.id === 'hub') {
-      var s = Diskarte.state;
-      var hud = el('div', 'hud');
-      hud.appendChild(el('span', null, 'Week ' + s.week + '/3'));
-      hud.appendChild(el('span', null, '₱' + s.cash));
-      hud.appendChild(el('span', null, 'Save ₱' + s.savings));
-      hud.appendChild(el('span', null, 'Debt ₱' + s.debt));
-      scr.appendChild(hud);
+    if (typeof def.build === 'function') {
+      def.build(scr);
+    } else {
+      scr.appendChild(el('div', 'scr__tag', def.tag));
+      scr.appendChild(el('div', 'scr__title', def.title));
+      scr.appendChild(el('div', 'scr__desc', def.desc));
     }
-
-    scr.appendChild(el('div', 'scr__tag', def.tag));
-    scr.appendChild(el('div', 'scr__title', def.title));
-    scr.appendChild(el('div', 'scr__desc', def.desc));
 
     var actions = el('div', 'scr__actions');
     (def.actions || []).forEach(function (a) {
@@ -64,6 +64,18 @@ window.Diskarte = window.Diskarte || {};
       id: 'hub', tag: 'S2 · Week Hub · M1',
       title: 'Week Hub',
       desc: 'HUD + meters + compulsion live here (built in M1). Start of each week.',
+      // Custom layout: live HUD on top, a sprite placeholder in the middle
+      // (real art is M8), and the Plan Budget action appended by render().
+      build: function (scr) {
+        Diskarte.hud.mount(scr);
+
+        var scene = el('div', 'hub__scene');
+        scene.appendChild(el('div', 'scr__tag', this.tag));
+        scene.appendChild(el('div', 'scr__title', this.title));
+        var sprite = el('div', 'hub__sprite', '[ character / room — M8 ]');
+        scene.appendChild(sprite);
+        scr.appendChild(scene);
+      },
       actions: [{ label: 'Plan Budget', to: 'budget' }]
     },
     budget: {
@@ -136,7 +148,8 @@ window.Diskarte = window.Diskarte || {};
     show: function (id) {
       var def = SCREENS[id];
       if (!def) { console.warn('Unknown screen:', id); return; }
-      Diskarte.state.currentScreen = id;
+      // currentScreen is router state, not a §6 game field — keep it off state.
+      Diskarte.screens.current = id;
       render(def);
     },
     init: function (mountEl) {
