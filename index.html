@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diskarte</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- #viewport fills the window and letterboxes the fixed-size #stage -->
+  <div id="viewport">
+    <!-- The 360x640 portrait game stage. All screens render inside #screen. -->
+    <div id="stage">
+      <div id="screen" aria-live="polite"><!-- screens.js renders here --></div>
+    </div>
+  </div>
+
+  <!-- Plain scripts (no modules) so the game also runs by double-clicking the
+       file, not only through Live Server. Load order matters: state first,
+       systems next, router, then main boots everything. -->
+  <script src="js/state.js"></script>
+  <script src="js/budget.js"></script>
+  <script src="js/gamble.js"></script>
+  <script src="js/compulsion.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/debrief.js"></script>
+  <script src="js/paths.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
