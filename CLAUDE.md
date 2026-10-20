@@ -23,10 +23,9 @@ When these and the code disagree, the **docs win** — update the code.
 - **Plain `<script>` tags, not ES modules**, so the game runs on `file://`
   too. Everything hangs off a single global: `window.Diskarte` (alias `D`).
   Load order is fixed in `index.html` (state → systems → screens → main).
-- **Offline-first (NFR-3):** no network calls at play time. The only current
-  exception is the Google-Fonts `@import` in `styles.css` — **bundle those
-  pixel fonts into `assets/fonts/` and switch to `@font-face`** before
-  calling the prototype done.
+- **Offline-first (NFR-3):** no network calls at play time. **Done** — the
+  pixel fonts are bundled in `assets/fonts/` (latin woff2) and loaded via
+  `@font-face`; there is no remaining network dependency.
 - **Portrait only:** logical stage is **360×640**, scaled to the window and
   letterboxed by `main.js`. Pixel art uses `image-rendering: pixelated`.
 - Palette lives as CSS variables in `styles.css` (SRS §3.5). Don't hardcode
@@ -38,6 +37,7 @@ index.html        loads everything (fixed script order)
 css/styles.css    palette vars, stage scaling, screen/button styles
 js/state.js       the single state object (SRS §6) + safe set/update/onChange
 js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
+js/room.js        M8 — walkable pixel Hub room (walk to desk → budget)
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
@@ -128,10 +128,25 @@ it). You should see the Title screen; you can click through all 11 screens.
   Flow Spec §6 end states exactly and every run (A: debt ₱1,464 · Trust 20 ·
   compulsion 84 · scholarship lost → LOSE; B: savings ₱500 · intact · comp 0 →
   WIN). Replay → Title so you can re-pick. **M0–M7 = a fully demoable prototype.**
-- **Next: M8** — polish: pixel art, animation, cheap win jingle + audio/mute,
-  "spot the manipulation" scoring surfaced, accessibility, and the offline
-  font bundling (@font-face into assets/fonts/) this file flags as required.
-  See the Build Plan.
+- **M8 (polish): DONE (this pass).** Offline fonts bundled (@font-face, no
+  network). The Week Hub is now a **walkable pixel room** (`room.js`): move the
+  character with arrow keys / WASD or tap, walk to the desk to start the
+  week's budget; other objects give flavor; a Plan Budget button remains as an
+  accessible fallback. Pixel-art pass via CSS/SVG (room furniture + character,
+  a phone notch on the gambling screens). Animations: screen fade-ins, meter
+  colour transitions, end-card pop, laptop glow, walk bob — all guarded by
+  `prefers-reduced-motion`. **"Spot the manipulation"** is surfaced: the ad's
+  5 dark patterns are tappable to flag them (✔ + awareness point), with a
+  live "N/5" score, and awareness shows on the debrief + end screens.
+  Accessibility: `:focus-visible` outlines, ARIA roles/labels on the room
+  objects and ad patterns, reduced-motion, and clean letterboxing with no
+  horizontal scroll down to a 320-wide window.
+- **Not in this pass (optional future polish):** audio + mute (deselected for
+  this pass; would be synthesized Web Audio, no asset files), and hand-drawn
+  sprite art / recorded audio (CSS pixel-art + the fonts stand in for now).
+- **Prototype status: M0–M8 complete.** The 3-week vertical slice is playable
+  (sandbox) and demoable (scripted Path A/B), offline, portrait, from one
+  folder. See SRS §9 for the requirement→demo verification mapping.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

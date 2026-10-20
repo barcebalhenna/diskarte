@@ -248,32 +248,64 @@ window.Diskarte = window.Diskarte || {};
     }, 1000);
   }
 
-  // ----- S5 Temptation Ad screen (M4) -----
-  // A phone ad packed with real dark patterns (SRS §4.2.8): false urgency,
-  // social proof, free-first bait, fake authority, near-miss. Play -> minigame;
-  // Report/Dismiss -> awareness +1 and skip straight to the consequence.
+  // ----- S5 Temptation Ad screen (M4 + M8 "spot the manipulation") -----
+  // A phone ad packed with real dark patterns (SRS §4.2.8). Each pattern is
+  // TAPPABLE: spotting it flags it and scores an awareness point (SRS §4.2.8,
+  // surfaced in M8). Play -> minigame; Report/Dismiss -> skip to consequence.
   function buildAd(scr) {
     scr.appendChild(el('div', 'scr__tag', 'S5 · Temptation Ad · M4'));
 
+    // "spotted N/5" counter — the scoring made visible.
+    var TOTAL = 5, spotted = 0;
+    var score = el('div', 'spot__score');
+    function refreshScore() { score.textContent = 'Spot the manipulation: ' + spotted + '/' + TOTAL; }
+
     var ad = el('div', 'ad');
+
+    // Wrap an element as a tappable dark pattern. Flagging it once adds a ✓ and
+    // an awareness point (the educational mechanic).
+    function pattern(node, hintText) {
+      node.classList.add('ad__pattern');
+      node.setAttribute('role', 'button');
+      node.setAttribute('tabindex', '0');
+      node.setAttribute('aria-label', 'Spot dark pattern: ' + hintText);
+      var flagged = false;
+      function flag() {
+        if (flagged) return;
+        flagged = true;
+        node.classList.add('is-spotted');
+        node.appendChild(el('span', 'ad__flag', '✔ ' + hintText));
+        spotted++;
+        Diskarte.set('awareness', Diskarte.state.awareness + 1);
+        refreshScore();
+      }
+      node.addEventListener('click', function (e) { e.stopPropagation(); flag(); });
+      node.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flag(); }
+      });
+      return node;
+    }
+
     var timer = el('div', 'ad__timer');
+    pattern(timer, 'fake countdown');
     ad.appendChild(timer);
     startFakeCountdown(timer, 15);
-    ad.appendChild(el('div', 'ad__head', '🎁 Claim your FREE ₱100 bonus spin!'));
-    ad.appendChild(el('div', 'ad__social', '🔥 47 people just won ₱10,000 — ikaw na!'));
-    ad.appendChild(el('div', 'ad__endorser', '✔ "Sinubukan ko ’to" — Verified™ idol'));
-    ad.appendChild(el('div', 'ad__nearmiss', 'Sayang, muntik na kanina! One more spin — 7 7 7'));
+    ad.appendChild(pattern(el('div', 'ad__head', '🎁 Claim your FREE ₱100 bonus spin!'), 'free bait'));
+    ad.appendChild(pattern(el('div', 'ad__social', '🔥 47 people just won ₱10,000 — ikaw na!'), 'fake winners'));
+    ad.appendChild(pattern(el('div', 'ad__endorser', '✔ "Sinubukan ko ’to" — Verified™ idol'), 'fake endorser'));
+    ad.appendChild(pattern(el('div', 'ad__nearmiss', 'Sayang, muntik na kanina! One more spin — 7 7 7'), 'near-miss'));
     scr.appendChild(ad);
 
-    scr.appendChild(el('div', 'ad__disclaim',
-      'Dark patterns above: fake countdown, "winners" ticker, free bait, fake endorser, near-miss.'));
+    refreshScore();
+    scr.appendChild(score);
+    scr.appendChild(el('div', 'ad__disclaim', 'I-tap ang mga mapanlinlang na bahagi para matutunan — tapos piliin:'));
 
     var actions = el('div', 'scr__actions');
     var play = el('button', 'btn btn--red', 'Play');
     play.addEventListener('click', function () { Diskarte.screens.show('spin'); });
     var dismiss = el('button', 'btn btn--green', 'Report / Dismiss');
     dismiss.addEventListener('click', function () {
-      Diskarte.set('awareness', Diskarte.state.awareness + 1);  // spotted it
+      Diskarte.set('awareness', Diskarte.state.awareness + 1);  // chose to resist
       Diskarte.screens.show('conseq');
     });
     actions.appendChild(play);
@@ -478,6 +510,7 @@ window.Diskarte = window.Diskarte || {};
       g.net < 0 ? 'is-bad' : (g.net > 0 ? 'is-good' : ''));
     line('Cash on hand', fmtPeso(s.cash));
     line('Savings', fmtPeso(s.savings) + ' / ₱500', s.savings >= 500 ? 'is-good' : '');
+    line('Manipulation spotted', s.awareness + '', s.awareness > 0 ? 'is-good' : '');
     scr.appendChild(card);
 
     var reflect;
@@ -685,16 +718,18 @@ window.Diskarte = window.Diskarte || {};
 
         var scene = el('div', 'hub__scene');
         scene.appendChild(el('div', 'scr__tag', this.tag));
-        scene.appendChild(el('div', 'scr__title', this.title));
         // Urge band: an unprompted nudge back toward the phone.
         if (Diskarte.compulsion.isUrge()) {
           scene.appendChild(urgeNudge('Kati sa kamay… isa pa kaya? (' +
             Diskarte.compulsion.band().label + ')'));
         }
-        var sprite = el('div', 'hub__sprite', '[ character / room — M8 ]');
-        scene.appendChild(sprite);
+        // Walkable pixel room — go to the desk to start the week's budget.
+        Diskarte.room.build(scene, function (action) {
+          if (action === 'budget') Diskarte.screens.show('budget');
+        });
         scr.appendChild(scene);
       },
+      // Fallback action (always works; keyboard/tap-accessible alongside the room).
       actions: [{ label: 'Plan Budget', to: 'budget' }]
     },
     budget: {
