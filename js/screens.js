@@ -731,7 +731,7 @@ window.Diskarte = window.Diskarte || {};
           scene.appendChild(urgeNudge('Kati sa kamay… isa pa kaya? (' +
             Diskarte.compulsion.band().label + ')'));
         }
-        // Walkable pixel room — go to the desk to start the week's budget.
+        // Static pixel room — tap the desk to start the week's budget.
         Diskarte.room.build(scene, function (action) {
           if (action === 'budget') Diskarte.screens.show('budget');
         });

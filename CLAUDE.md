@@ -38,7 +38,7 @@ css/styles.css    palette vars, stage scaling, screen/button styles
 js/state.js       the single state object (SRS §6) + safe set/update/onChange
 js/audio.js       M8 — synthesized Web Audio SFX + persistent mute toggle
 js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
-js/room.js        M8 — walkable pixel Hub room (walk to desk → budget)
+js/room.js        M8 — static pixel Hub room (tap desk → budget)
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
@@ -130,10 +130,11 @@ it). You should see the Title screen; you can click through all 11 screens.
   compulsion 84 · scholarship lost → LOSE; B: savings ₱500 · intact · comp 0 →
   WIN). Replay → Title so you can re-pick. **M0–M7 = a fully demoable prototype.**
 - **M8 (polish): DONE (this pass).** Offline fonts bundled (@font-face, no
-  network). The Week Hub is now a **walkable pixel room** (`room.js`): move the
-  character with arrow keys / WASD or tap, walk to the desk to start the
-  week's budget; other objects give flavor; a Plan Budget button remains as an
-  accessible fallback. Pixel-art pass via CSS/SVG (room furniture + character,
+  network). The Week Hub is a **static pixel room** (`room.js`): wall, window,
+  door, bed, and a desk with a glowing laptop plus the character standing by
+  it. Tap the desk to start the week's budget; other objects give a line of
+  flavor; a Plan Budget button remains as an accessible fallback. (Earlier it
+  was a walkable room; switched to static on request.) Pixel-art pass via CSS/SVG (room furniture + character,
   a phone notch on the gambling screens). Animations: screen fade-ins, meter
   colour transitions, end-card pop, laptop glow, walk bob — all guarded by
   `prefers-reduced-motion`. **"Spot the manipulation"** is surfaced: the ad's

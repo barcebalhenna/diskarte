@@ -726,7 +726,6 @@ html, body {
   border-radius: 6px;
   overflow: hidden;
   image-rendering: pixelated;
-  cursor: pointer;
 }
 .room__wall  { position: absolute; left: 0; right: 0; top: 0; height: 120px; background: var(--wall); }
 .room__floor { position: absolute; left: 0; right: 0; top: 120px; bottom: 0; background: var(--floor); }
@@ -736,7 +735,7 @@ html, body {
   background: rgba(0, 0, 0, 0.25);
 }
 
-.room__obj { position: absolute; }
+.room__obj { position: absolute; cursor: pointer; }
 .room__obj:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
 
 /* window on the wall */
@@ -779,8 +778,8 @@ html, body {
 /* phone on the desk */
 .room__phone { background: #0c0c14; border: 1px solid var(--red); border-radius: 2px; }
 
-/* character: head + body */
-.room__char { position: absolute; width: 18px; height: 26px; transition: none; z-index: 5; }
+/* character: head + body (standing, static) */
+.room__char { position: absolute; width: 18px; height: 26px; z-index: 5; }
 .room__char-head {
   position: absolute; left: 3px; top: 0; width: 12px; height: 11px;
   background: var(--skin); border-radius: 3px 3px 2px 2px;
@@ -789,7 +788,6 @@ html, body {
   position: absolute; left: 1px; top: 10px; width: 16px; height: 16px;
   background: var(--warm); border-radius: 3px 3px 2px 2px;
 }
-.room__char.is-walking { animation: charBob 0.28s steps(2) infinite; }
 
 /* interaction prompt + hint */
 .room__prompt {
@@ -807,11 +805,9 @@ html, body {
   text-align: center; font-size: 11px; color: var(--muted); z-index: 6;
 }
 
-@keyframes charBob { 0% { transform: translateY(0); } 100% { transform: translateY(-2px); } }
 @keyframes screenGlow { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .room__char.is-walking { animation: none; }
   .room__laptop::after { animation: none; }
 }
 
