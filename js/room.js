@@ -64,9 +64,7 @@ window.Diskarte = window.Diskarte || {};
         d.setAttribute('role', 'button');
         d.setAttribute('tabindex', '0');
         d.setAttribute('aria-label', o.label);
-        if (o.id === 'desk')   d.appendChild(el('div', 'room__laptop'));
-        if (o.id === 'window') d.appendChild(el('div', 'room__winpane'));
-        if (o.id === 'bed')    d.appendChild(el('div', 'room__pillow'));
+        if (Diskarte.sprites && Diskarte.sprites[o.id]) d.innerHTML = Diskarte.sprites[o.id];
         d.addEventListener('click', function (e) { e.stopPropagation(); activate(o); });
         d.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(o); }
@@ -74,12 +72,16 @@ window.Diskarte = window.Diskarte || {};
         root.appendChild(d);
       });
 
+      // decorative plant (non-interactive)
+      var plant = el('div', 'room__decor room__plant');
+      if (Diskarte.sprites) plant.innerHTML = Diskarte.sprites.plant;
+      root.appendChild(plant);
+
       // character standing by the desk (static)
       var charEl = el('div', 'room__char');
       charEl.style.left = '168px';
-      charEl.style.top = '202px';
-      charEl.appendChild(el('div', 'room__char-head'));
-      charEl.appendChild(el('div', 'room__char-body'));
+      charEl.style.top = '198px';
+      if (Diskarte.sprites) charEl.innerHTML = Diskarte.sprites.character;
       root.appendChild(charEl);
 
       root.appendChild(prompt);
