@@ -559,12 +559,13 @@ window.Diskarte = window.Diskarte || {};
     return box;
   }
 
-  // Replay resets to initial state and returns to Character Select (Flow Spec).
+  // Replay resets to initial state and returns to the Title launcher, so the
+  // player can pick sandbox or either scripted path again.
   function replayButton(variant) {
     var b = el('button', 'btn btn--' + variant, 'Replay');
     b.addEventListener('click', function () {
-      Diskarte.resetState();
-      Diskarte.screens.show('char');
+      Diskarte.resetState('sandbox');
+      Diskarte.screens.show('title');
     });
     return b;
   }
@@ -598,13 +599,73 @@ window.Diskarte = window.Diskarte || {};
     scr.appendChild(actions);
   }
 
+  // ----- Scripted-path playback (M7) -----
+  // In Path A/B the engine injects each beat's canonical state (paths.js) and
+  // renders a read-only beat view: a SCRIPTED banner, the live HUD (so the
+  // numbers move beat by beat), the odds tracker on gambling beats, a caption
+  // of the scripted action, and a single "Next ▶". End beats show the real
+  // end screen. Sandbox never touches this path.
+  var SCRIPTED_NAMES = {
+    hub: 'Week Hub', budget: 'Budget', event: 'Life Event', ad: 'Phone Ad',
+    spin: 'Gambling', result: 'Result', conseq: 'Consequence', debrief: 'Debrief'
+  };
+
+  function renderScripted(beat) {
+    if (Diskarte.hud) Diskarte.hud.unmount();
+    mount.innerHTML = '';
+    var scr = el('div', 'scr' + (beat.phone ? ' scr--phone' : ''));
+
+    if (beat.screen === 'end_win') { buildEndWin(scr); mount.appendChild(scr); return; }
+    if (beat.screen === 'end_lose') { buildEndLose(scr); mount.appendChild(scr); return; }
+
+    var banner = el('div', 'script__banner', '▶ SCRIPTED · ' + Diskarte.paths.label());
+    scr.appendChild(banner);
+
+    Diskarte.hud.mount(scr);             // live numbers ride along on every beat
+    if (beat.screen === 'spin' || beat.screen === 'result') {
+      scr.appendChild(buildOddsTracker());
+    }
+
+    var cap = el('div', 'script__caption');
+    cap.appendChild(el('div', 'script__screen', SCRIPTED_NAMES[beat.screen] || beat.screen));
+    cap.appendChild(el('div', 'script__text', beat.caption));
+    scr.appendChild(cap);
+
+    var actions = el('div', 'scr__actions');
+    var next = el('button', 'btn btn--green', beat.last ? 'See the ending ▶' : 'Next ▶');
+    next.addEventListener('click', function () { Diskarte.paths.advance(); });
+    actions.appendChild(next);
+    scr.appendChild(actions);
+
+    mount.appendChild(scr);
+  }
+
   // --- Screen definitions (placeholders). Transitions = Flow Spec §2. ---
   var SCREENS = {
     title: {
       id: 'title', tag: 'S0 · Title',
       title: 'DISKARTE',
-      desc: 'Survive the month. Outsmart the odds. (Title / Main Menu — Start, How to Play, Mute.)',
-      actions: [{ label: 'Start', to: 'char', variant: 'green' }]
+      // Launcher: play freely (sandbox) or watch either scripted golden path.
+      build: function (scr) {
+        scr.appendChild(el('div', 'scr__tag', this.tag));
+        scr.appendChild(el('div', 'scr__title', 'DISKARTE'));
+        scr.appendChild(el('div', 'scr__desc', 'Survive the month. Outsmart the odds.'));
+
+        var actions = el('div', 'scr__actions');
+        var play = el('button', 'btn btn--green', 'Play — Sandbox');
+        play.addEventListener('click', function () {
+          Diskarte.resetState('sandbox');
+          Diskarte.screens.show('char');
+        });
+        var a = el('button', 'btn btn--red', 'Watch Path A — The Spiral');
+        a.addEventListener('click', function () { Diskarte.paths.start('A'); });
+        var b = el('button', 'btn', 'Watch Path B — The Resist');
+        b.addEventListener('click', function () { Diskarte.paths.start('B'); });
+        actions.appendChild(play);
+        actions.appendChild(a);
+        actions.appendChild(b);
+        scr.appendChild(actions);
+      }
     },
     char: {
       id: 'char', tag: 'S1 · Character Select · M0',
@@ -694,6 +755,11 @@ window.Diskarte = window.Diskarte || {};
       // currentScreen is router state, not a §6 game field — keep it off state.
       Diskarte.screens.current = id;
       render(def);
+    },
+    // Called by paths.js during scripted playback to render one beat.
+    showScriptedBeat: function (beat) {
+      Diskarte.screens.current = beat.screen;
+      renderScripted(beat);
     },
     init: function (mountEl) {
       mount = mountEl;

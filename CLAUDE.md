@@ -45,7 +45,7 @@ js/gamble.js      M4 — rigged odds model + spin (done, SRS App. B)
 js/compulsion.js  M5 — compulsion band authority + effects (done)
 js/events.js      M3 — data-driven life-event cards, 1 per week (done)
 js/debrief.js     M6 — debrief + win/lose + hard-fail eval (done)
-js/paths.js       M7 — scripted Path A/B beats (stub)
+js/paths.js       M7 — scripted Path A/B beat playback (done)
 js/main.js        boot + stage scaling
 assets/           sprites / fonts / audio (empty; filled at M8)
 ```
@@ -118,9 +118,20 @@ it). You should see the Title screen; you can click through all 11 screens.
   End-Win / End-Lose screens (final figures, reason, Replay → reset → S1).
   **The full M0–M6 loop is playable: both a natural win (save + raket → ₱700)
   and the gambling spiral (→ addiction/debt/scholarship lose) reproduce.**
-- **Next: M7** — thread the scripted golden paths (A spiral→lose, B resist→win)
-  from the Flow Spec beat tables via `paths.js`, plus a launcher and the
-  sandbox toggle. Needs the Flow Spec (already in repo). See the Build Plan.
+- **M7 (scripted golden paths): DONE.** `paths.js` holds the Path A (spiral→
+  lose) and Path B (resist→win) beat sequences from the Flow Spec §4–5. In a
+  scripted path the engine injects each beat's canonical state and renders a
+  read-only playback (SCRIPTED banner + live HUD + odds tracker on gambling
+  beats + a Taglish caption + "Next ▶"); end beats show the real end screen.
+  The Title is now a launcher: **Play — Sandbox** (full interactive engine,
+  unchanged) / **Watch Path A** / **Watch Path B**. Both paths reproduce their
+  Flow Spec §6 end states exactly and every run (A: debt ₱1,464 · Trust 20 ·
+  compulsion 84 · scholarship lost → LOSE; B: savings ₱500 · intact · comp 0 →
+  WIN). Replay → Title so you can re-pick. **M0–M7 = a fully demoable prototype.**
+- **Next: M8** — polish: pixel art, animation, cheap win jingle + audio/mute,
+  "spot the manipulation" scoring surfaced, accessibility, and the offline
+  font bundling (@font-face into assets/fonts/) this file flags as required.
+  See the Build Plan.
 
 ## Working agreement
 Build **one milestone at a time**, in order. Stop at each milestone's

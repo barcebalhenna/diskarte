@@ -658,3 +658,38 @@ html, body {
 .end__fv { font-family: var(--font-display); font-size: 8px; color: var(--text); }
 .end__fv.is-good { color: var(--green); }
 .end__fv.is-bad  { color: var(--red); }
+
+/* ===================== Scripted playback (M7) ===================== */
+.script__banner {
+  font-family: var(--font-display);
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: var(--warm);
+  background: var(--panel);
+  border: 1px solid var(--warm);
+  border-radius: 4px;
+  padding: 5px 7px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.script__caption {
+  background: var(--panel);
+  border: 1px solid rgba(241, 250, 238, 0.12);
+  border-left: 3px solid var(--warm);
+  border-radius: 6px;
+  padding: 10px;
+  margin: 8px 0 auto;
+}
+.script__screen {
+  font-family: var(--font-display);
+  font-size: 7px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.script__text {
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--text);
+}
