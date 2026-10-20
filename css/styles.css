@@ -877,3 +877,22 @@ html, body {
   .end__card { animation: none; }
   .seg { transition: none; }
 }
+
+/* ===================== Mute toggle (M8 audio) ===================== */
+#mute-toggle {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 50;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+}
+#mute-toggle:hover { filter: brightness(1.15); }
+#mute-toggle:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; }

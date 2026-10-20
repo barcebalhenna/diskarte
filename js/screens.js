@@ -369,6 +369,7 @@ window.Diskarte = window.Diskarte || {};
   // tracker stays on screen. "Play again" is the chase; "Stop" exits.
   function buildResult(scr) {
     var r = Diskarte.gamble.lastResult();
+    if (Diskarte.audio && r) Diskarte.audio.play(r.win ? 'winCheap' : 'lose');
     scr.appendChild(el('div', 'scr__tag', 'S7 · Result / The Chase · M4'));
 
     var card = el('div', 'spin__result ' + (r && r.win ? 'is-win' : 'is-lose'));
@@ -416,6 +417,11 @@ window.Diskarte = window.Diskarte || {};
     var start = s.weekStart || {};
     var failReason = Diskarte.debrief.hardFail(); // full S8 hard-fail (Flow Spec)
     var gameOver = !!failReason;
+
+    // soft alarm when a need is running dangerously low (SRS §3.6)
+    if (Diskarte.audio && Math.min(s.meterFood, s.meterEnergy, s.meterTrust) < 20) {
+      Diskarte.audio.play('alarm');
+    }
 
     scr.appendChild(el('div', 'scr__tag', 'S8 · Consequence · M5'));
     scr.appendChild(el('div', 'scr__title', gameOver ? 'Game Over' : 'Consequence'));
@@ -535,6 +541,7 @@ window.Diskarte = window.Diskarte || {};
       var toSave = el('button', 'btn btn--green', 'Move ₱' + s.cash.toLocaleString('en-US') + ' to savings');
       toSave.addEventListener('click', function () {
         Diskarte.update({ savings: Diskarte.state.savings + Diskarte.state.cash, cash: 0 });
+        if (Diskarte.audio) Diskarte.audio.play('coin');
         Diskarte.screens.show('debrief');   // re-render with the updated buffer
       });
       actions.appendChild(toSave);
@@ -645,6 +652,7 @@ window.Diskarte = window.Diskarte || {};
 
   function renderScripted(beat) {
     if (Diskarte.hud) Diskarte.hud.unmount();
+    if (Diskarte.audio && beat.sfx) Diskarte.audio.play(beat.sfx);
     mount.innerHTML = '';
     var scr = el('div', 'scr' + (beat.phone ? ' scr--phone' : ''));
 

@@ -107,6 +107,7 @@ window.Diskarte = window.Diskarte || {};
     if (s.week >= 3) return false;
 
     Diskarte.update({ week: s.week + 1, cash: s.cash + incomeFor(s.character) });
+    if (Diskarte.audio) Diskarte.audio.play('coin');   // income arrives
     if (Diskarte.state.debt > 0) {
       Diskarte.set('debt', Math.round(Diskarte.state.debt * 1.2)); // 5-6 compounding
     }

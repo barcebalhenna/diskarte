@@ -36,6 +36,7 @@ When these and the code disagree, the **docs win** — update the code.
 index.html        loads everything (fixed script order)
 css/styles.css    palette vars, stage scaling, screen/button styles
 js/state.js       the single state object (SRS §6) + safe set/update/onChange
+js/audio.js       M8 — synthesized Web Audio SFX + persistent mute toggle
 js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
 js/room.js        M8 — walkable pixel Hub room (walk to desk → budget)
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
@@ -141,9 +142,16 @@ it). You should see the Title screen; you can click through all 11 screens.
   Accessibility: `:focus-visible` outlines, ARIA roles/labels on the room
   objects and ad patterns, reduced-motion, and clean letterboxing with no
   horizontal scroll down to a 320-wide window.
-- **Not in this pass (optional future polish):** audio + mute (deselected for
-  this pass; would be synthesized Web Audio, no asset files), and hand-drawn
-  sprite art / recorded audio (CSS pixel-art + the fonts stand in for now).
+- **M8 audio pass: DONE.** `audio.js` synthesizes all SFX with the Web Audio
+  API (no asset files, offline): a bright `coin` on income/saving, a
+  deliberately thin/flat `winCheap` jingle so gambling wins never feel good
+  (NFR-ETH-2), a dull `lose`, and a soft low-meter `alarm`. Hooked into the
+  spin result, the move-to-savings, week-advance income, and the Consequence
+  (meter < 20); scripted beats carry their own `sfx`. A persistent mute toggle
+  (🔊 top-left, remembered in localStorage so Replay doesn't un-mute) silences
+  everything. (A background chiptune loop, SRS §3.6, is left as optional.)
+- **Remaining optional polish:** hand-drawn sprite art / recorded audio
+  (the CSS pixel-art, bundled fonts, and synth SFX stand in).
 - **Prototype status: M0–M8 complete.** The 3-week vertical slice is playable
   (sandbox) and demoable (scripted Path A/B), offline, portrait, from one
   folder. See SRS §9 for the requirement→demo verification mapping.
