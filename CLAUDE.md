@@ -39,6 +39,7 @@ js/state.js       the single state object (SRS §6) + safe set/update/onChange
 js/audio.js       M8 — synthesized Web Audio SFX + persistent mute toggle
 js/hud.js         M1 — Week Hub HUD (money, meters, compulsion) bound to state
 js/room.js        M8 — static pixel Hub room (tap desk → budget)
+js/sprites.js     M8 — inline-SVG pixel sprites (room furniture + character)
 js/dev.js         M1 — TEMPORARY dev panel (mutate state to test the HUD)
 js/screens.js     screen router + all 11 screens; Budget screen built (M2)
 js/budget.js      M2 — allocation + meter drains + week advance (done)
@@ -151,6 +152,14 @@ it). You should see the Title screen; you can click through all 11 screens.
   (meter < 20); scripted beats carry their own `sfx`. A persistent mute toggle
   (🔊 top-left, remembered in localStorage so Replay doesn't un-mute) silences
   everything. (A background chiptune loop, SRS §3.6, is left as optional.)
+- **Pixel-art visual redesign: DONE.** A cohesive "pixel pass" across every
+  screen: chunky beveled panels with hard edges (no rounded corners), a
+  shade-ramped palette (`--green-hi/-lo`, `--ink`, etc. in `styles.css`), a
+  CRT scanline + vignette overlay on the stage, pixel buttons with a drop-edge
+  that collapses on press, 2-tone recessed meters, money chips with inline-SVG
+  pixel icons, and inline-SVG pixel sprites for the Hub room + character
+  (`sprites.js`). All CSS/SVG — no new asset files, still offline. Verified on
+  all 11 screens + both scripted paths with no console errors.
 - **Remaining optional polish:** hand-drawn sprite art / recorded audio
   (the CSS pixel-art, bundled fonts, and synth SFX stand in).
 - **Prototype status: M0–M8 complete.** The 3-week vertical slice is playable
