@@ -813,6 +813,15 @@ html, body {
   --wood:    #6b4a2b;
   --wood-lt: #8a6238;
   --sky:     #3d6a8a;
+  --sky-hi:  #8cae78;
+  --grass:   #527b59;
+  --road-edge: #77745f;
+  --dirt-path: #a18b61;
+  --store-front: #c8903f;
+  --school-front: #b5544c;
+  --court-front: #557f58;
+  --cafe-front: #56516f;
+  --cafe-screen: #43AA8B;
   --skin:    #d9a066;
 }
 
@@ -914,6 +923,40 @@ html, body {
   position: absolute; left: 0; right: 0; bottom: 4px;
   text-align: center; font-size: 11px; color: var(--muted); z-index: 6;
 }
+
+/* ===================== Walkable barangay hub ===================== */
+.room--world {
+  height: 330px;
+  margin-top: 6px;
+  background: var(--grass);
+  border-color: var(--ink);
+}
+.world__sky { position:absolute; inset:0 0 56% 0; background:linear-gradient(var(--sky), var(--sky-hi)); }
+.world__road { position:absolute; left:-18px; right:-18px; top:135px; height:56px; background:var(--floor); border-top:4px solid var(--road-edge); border-bottom:4px solid var(--road-edge); transform:rotate(-5deg); }
+.world__road::after { content:''; position:absolute; top:23px; left:0; right:0; border-top:2px dashed var(--warm); }
+.world__path { position:absolute; left:112px; top:66px; width:74px; height:210px; background:var(--dirt-path); opacity:.8; transform:rotate(9deg); }
+.world__sun { position:absolute; right:24px; top:28px; width:24px; height:24px; background:var(--warm); box-shadow:0 0 0 5px rgba(255,159,28,.18); }
+.world__place { position:absolute; z-index:3; width:72px; height:54px; border:0; padding:0; background:transparent; cursor:pointer; }
+.world__building { position:absolute; left:7px; right:7px; top:8px; height:35px; border:3px solid var(--ink); background:var(--wood); box-shadow:inset 0 5px 0 var(--wood-lt); }
+.world__building::before { content:''; position:absolute; left:13px; top:9px; width:12px; height:13px; background:var(--sky); border:2px solid var(--ink); }
+.world__building::after { content:''; position:absolute; right:8px; bottom:0; width:10px; height:20px; background:var(--panel); border:2px solid var(--ink); border-bottom:0; }
+.world__place--school .world__building { background:var(--school-front); box-shadow:inset 0 5px 0 var(--red-hi); }
+.world__place--store .world__building { background:var(--store-front); box-shadow:inset 0 5px 0 var(--warm-hi); }
+.world__place--court .world__building { background:var(--court-front); box-shadow:inset 0 5px 0 var(--green-hi); }
+.world__place--cafe .world__building { background:var(--cafe-front); box-shadow:inset 0 5px 0 var(--panel-hi); }
+.world__place--cafe .world__building::before { width:24px; height:14px; background:var(--cafe-screen); }
+.world__label { position:absolute; top:44px; left:0; right:0; color:white; font:7px var(--font-display); text-shadow:1px 1px var(--ink); text-align:center; }
+.world__place.is-near .world__building { outline:2px solid var(--warm); }
+.world__player { position:absolute; z-index:5; width:18px; height:27px; transition:left .08s linear, top .08s linear; filter:drop-shadow(1px 2px 0 var(--ink)); }
+.world__player svg { width:100%; height:100%; }
+.world__message { position:absolute; z-index:7; top:4px; left:50%; transform:translateX(-50%); width:calc(100% - 94px); min-height:33px; padding:5px; border:2px solid var(--ink); background:var(--panel); color:var(--text); font-size:12px; line-height:1.05; text-align:center; }
+.world__controls--overlay { position:absolute; z-index:8; inset:auto 6px 6px auto; display:flex; align-items:end; gap:6px; }
+.world__pad { width:86px; height:80px; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:2px; }
+.world__dir { border:2px solid var(--ink); background:var(--panel); color:var(--text); font:12px var(--font-display); box-shadow:inset 1px 1px 0 var(--bev-hi); }
+.world__interact { width:104px; min-height:40px; padding:4px; font-size:7px; }
+.world__go { margin-top:3px; border:1px solid var(--warm); padding:2px 4px; color:var(--warm); background:var(--night); font:7px var(--font-display); cursor:pointer; }
+.world__dir:focus-visible, .world__place:focus-visible, .world__go:focus-visible { outline:2px solid var(--warm); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce) { .world__player { transition:none; } }
 
 @keyframes screenGlow { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
 

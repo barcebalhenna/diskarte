@@ -715,11 +715,11 @@ window.Diskarte = window.Diskarte || {};
       actions: [{ label: 'Confirm: Iskolar', to: 'hub', variant: 'green' }]
     },
     hub: {
-      id: 'hub', tag: 'S2 · Week Hub · M1',
-      title: 'Week Hub',
+      id: 'hub', tag: 'S2 · Barangay · M8',
+      title: 'Your Barangay',
       desc: 'HUD + meters + compulsion live here (built in M1). Start of each week.',
-      // Custom layout: live HUD on top, a sprite placeholder in the middle
-      // (real art is M8), and the Plan Budget action appended by render().
+      // Custom layout: live HUD plus the walkable neighborhood; Plan Budget
+      // stays available as a direct, accessible route into the weekly loop.
       build: function (scr) {
         snapshotWeek();                 // mark the start of this week
         Diskarte.hud.mount(scr);
@@ -731,7 +731,7 @@ window.Diskarte = window.Diskarte || {};
           scene.appendChild(urgeNudge('Kati sa kamay… isa pa kaya? (' +
             Diskarte.compulsion.band().label + ')'));
         }
-        // Static pixel room — tap the desk to start the week's budget.
+        // Explore the neighborhood, then return home to plan this week's budget.
         Diskarte.room.build(scene, function (action) {
           if (action === 'budget') Diskarte.screens.show('budget');
         });
